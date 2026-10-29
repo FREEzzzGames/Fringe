@@ -27,7 +27,7 @@ self.addEventListener("fetch", (event) => {
 
   // Always check the deployed app shell first so a new commit is picked up on re-entry.
   const isNavigation = event.request.mode === "navigate";
-  const isAppCode = /\\.(?:js|css|webmanifest)$/.test(url.pathname);
+  const isAppCode = /\.(?:js|css|webmanifest)$/.test(url.pathname);
   if (isNavigation || isAppCode) {
     event.respondWith(
       fetch(event.request, { cache: "no-store" })
