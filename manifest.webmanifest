@@ -1,0 +1,12 @@
+{
+  "name": "Ghost Layers",
+  "short_name": "GhostLayers",
+  "description": "Local-first spatial AR layer viewer and creator",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#05090d",
+  "theme_color": "#05090d",
+  "icons": []
+}
