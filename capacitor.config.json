@@ -4,10 +4,10 @@
   "webDir": "dist",
   "bundledWebRuntime": false,
   "server": {
-    "url": "https://freezzzgames.github.io/Fringe/",
+    "url": "https://ghost-layer-ota.onrender.com",
     "cleartext": false,
     "allowNavigation": [
-      "freezzzgames.github.io"
+      "ghost-layer-ota.onrender.com"
     ]
   },
   "android": {
