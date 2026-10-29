@@ -36,6 +36,7 @@ let hitPoseMatrix = null;
 let currentAnchor = null;
 let placedMeshes = new Map();
 let selectedHitPose = null;
+let selectedHitResult = null;
 let cameraStream = null;
 let localObjectUrls = new Map();
 let lastFrameAt = 0;
@@ -44,8 +45,6 @@ let fpsWindowAt = performance.now();
 let fps = 0;
 let sensorSnapshot = { position: null, heading: null };
 let renderer, camera, scene, gridMesh, reticle, gridMaterial;
-let xrSupported = false;
-let pendingPlacement = false;
 let wallGridVisible = false;
 
 const sensorManager = new SensorManager(
@@ -158,7 +157,6 @@ function onResize() {
 }
 
 function renderFrame(time, frame) {
-  const delta = lastFrameAt ? Math.min((time - lastFrameAt) / 1000, 0.05) : 0;
   lastFrameAt = time;
   if (gridMaterial) gridMaterial.uniforms.uTime.value = time / 1000;
   if (frame && xrSession && hitTestSource && referenceSpace) {
@@ -167,6 +165,7 @@ function renderFrame(time, frame) {
       const pose = hits[0].getPose(referenceSpace);
       if (pose) {
         selectedHitPose = pose;
+        selectedHitResult = hits[0];
         reticle.visible = true;
         reticle.matrix.fromArray(pose.transform.matrix);
         gridMesh.matrix.fromArray(pose.transform.matrix);
@@ -184,6 +183,7 @@ function renderFrame(time, frame) {
       }
     } else {
       selectedHitPose = null;
+      selectedHitResult = null;
       reticle.visible = false;
       gridMesh.visible = false;
       scanLabel.textContent = "SEARCHING FOR SURFACE";
@@ -243,6 +243,7 @@ async function cleanupXR() {
   viewerSpace = null;
   referenceSpace = null;
   selectedHitPose = null;
+  selectedHitResult = null;
   xrSession = null;
   reticle.visible = false;
   gridMesh.visible = false;
@@ -399,8 +400,7 @@ async function placeCurrentLayer() {
   };
   const mediaUrl = imageFile ? URL.createObjectURL(imageFile) : "";
   const audioUrl = audioFile ? URL.createObjectURL(audioFile) : "";
-  if (mediaUrl) localObjectUrls.set("image:" + Date.now(), mediaUrl);
-  if (audioUrl) localObjectUrls.set("audio:" + Date.now(), audioUrl);
+  
 
   const layer = {
     layer_id: "gl_" + crypto.randomUUID().replaceAll("-", "").slice(0, 12),
@@ -418,6 +418,8 @@ async function placeCurrentLayer() {
     monetization: { is_for_rent: false, weekly_rate_usd: 0, owner_address: "" }
   };
 
+  if (mediaUrl) localObjectUrls.set("image:" + layer.layer_id, mediaUrl);
+  if (audioUrl) localObjectUrls.set("audio:" + layer.layer_id, audioUrl);
   layers.unshift(layer);
   persistLayers();
   if (xrSession && selectedHitPose) {
@@ -425,10 +427,10 @@ async function placeCurrentLayer() {
     const mesh = makeLayerMesh(layer, poseMatrix);
     mesh.scale.multiplyScalar(Number($("scale").value));
     mesh.rotation.z += THREE.MathUtils.degToRad(Number($("yaw").value));
-    const hitResult = selectedHitPose;
     // Anchor creation is optional and not available in all implementations.
-    if (hitResult && typeof hitResult.createAnchor === "function") {
-      try { currentAnchor = await hitResult.createAnchor(); } catch (error) { console.debug("Anchor fallback:", error); }
+    currentAnchor = null;
+    if (selectedHitResult && typeof selectedHitResult.createAnchor === "function") {
+      try { currentAnchor = await selectedHitResult.createAnchor(); } catch (error) { console.debug("Anchor fallback:", error); }
     }
     showToast(currentAnchor ? "Layer placed with a session anchor." : "Layer placed at the current hit pose.");
   } else {
@@ -613,10 +615,6 @@ function bindUI() {
     const file = event.target.files?.[0];
     if (file) importJSON(file);
     event.target.value = "";
-  });
-  renderer.domElement.addEventListener("pointerdown", (event) => {
-    if (!xrSession || !selectedHitPose || mode !== "create") return;
-    pendingPlacement = true;
   });
   document.addEventListener("visibilitychange", () => {
     if (document.hidden && cameraStream) {
