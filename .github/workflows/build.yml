@@ -11,7 +11,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: ghost-layer-android
+  group: ghost-layer-android-${{ github.event_name }}
   cancel-in-progress: true
 
 jobs:
@@ -32,7 +32,10 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
         with:
-          packages: 'platform-tools,platforms;android-35,build-tools;35.0.0'
+          packages: |
+            platform-tools
+            platforms;android-35
+            build-tools;35.0.0
           log-accepted-android-sdk-licenses: false
       - name: Install web dependencies
         run: npm install
