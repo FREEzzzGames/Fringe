@@ -1,4 +1,4 @@
-name: Build and deploy personal Ghost Layers app
+name: Build Ghost Layer Android APK
 
 on:
   push:
@@ -11,42 +11,45 @@ permissions:
   contents: read
 
 concurrency:
-  group: ghost-layers-pages
+  group: ghost-layer-android
   cancel-in-progress: true
 
 jobs:
-  build:
+  android-apk:
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Set up Node
+      - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Install dependencies
-        run: npm install
-      - name: Production build
-        run: npm run build
-      - name: Upload Pages artifact
-        if: github.event_name != 'pull_request'
-        uses: actions/upload-pages-artifact@v3
+          cache: npm
+      - name: Set up Java
+        uses: actions/setup-java@v4
         with:
-          path: dist
-
-  deploy:
-    if: github.event_name != 'pull_request'
-    needs: build
-    runs-on: ubuntu-latest
-    permissions:
-      pages: write
-      id-token: write
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: Configure Pages
-        uses: actions/configure-pages@v5
-      - name: Deploy personal prototype
-        id: deployment
-        uses: actions/deploy-pages@v4
+          distribution: temurin
+          java-version: '21'
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+      - name: Install web dependencies
+        run: npm install
+      - name: Build web app
+        run: npm run build
+      - name: Generate Android project
+        run: npx cap add android
+      - name: Sync app assets
+        run: npx cap sync android
+      - name: Build debug APK
+        run: |
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleDebug
+      - name: Upload test APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: ghost-layer-debug-apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          retention-days: 14
