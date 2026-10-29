@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#05090d">
+  <meta name="description" content="Ghost Layers — a local-first spatial AR layer viewer and creator.">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <title>GHOST LAYERS // Spatial layer system</title>
+  <style>
+    :root{color-scheme:dark;--bg:#05090d;--panel:rgba(5,13,19,.88);--cyan:#00f3ff;--green:#73ffb5;--muted:#78919a;--line:rgba(0,243,255,.28);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+    *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg);color:#e9fcff}body{overscroll-behavior:none}button,input,select,textarea{font:inherit}button{color:inherit;cursor:pointer;border:1px solid var(--line);background:#07151b;padding:11px 13px;min-height:42px;border-radius:8px}button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}button.primary{background:var(--cyan);color:#001013;border-color:var(--cyan);font-weight:800}button:disabled{opacity:.4;cursor:not-allowed}.eyebrow{font-size:10px;letter-spacing:.22em;color:var(--cyan);text-transform:uppercase}.small{font-size:12px;color:var(--muted)}#scene{position:fixed;inset:0;z-index:0;background:radial-gradient(ellipse at 50% 45%,#0b2028 0%,#05090d 65%);overflow:hidden}#scene canvas,#camera-feed{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}#camera-feed{display:none;z-index:0}#scene canvas{z-index:1}#hud{position:fixed;inset:0;z-index:3;pointer-events:none;padding:env(safe-area-inset-top) 14px env(safe-area-inset-bottom)}.interactive{pointer-events:auto}.topbar{position:absolute;top:calc(env(safe-area-inset-top) + 10px);left:14px;right:14px;display:grid;grid-template-columns:minmax(0,1fr) 42px;grid-template-areas:"brand menu";align-items:start;gap:8px;padding:0}.brand-block{grid-area:brand;min-width:0}.brand{font-size:15px;font-weight:900;letter-spacing:.14em;line-height:1.25;white-space:nowrap}.brand span{color:var(--cyan)}.brand-block .eyebrow{margin-top:4px;line-height:1.3}.status{display:flex;align-items:center;gap:7px;margin-top:7px;max-width:100%;color:var(--green);font-size:10px;letter-spacing:.12em;line-height:1.3}.status span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.topbar #menu-btn{grid-area:menu;width:42px;min-width:42px;min-height:42px;padding:8px}.dot{flex:0 0 7px;width:7px;height:7px;border-radius:50%;background:currentColor;box-shadow:0 0 10px currentColor}.panel{background:var(--panel);border:1px solid var(--line);backdrop-filter:blur(12px);border-radius:12px;box-shadow:0 8px 30px #0005}.modebar{position:absolute;top:calc(env(safe-area-inset-top) + 104px);left:14px;right:14px;display:flex;gap:7px}.modebar button{flex:1;min-width:0;white-space:nowrap;font-size:11px;letter-spacing:.1em;text-transform:uppercase;padding:10px 5px}.modebar button[aria-pressed=true]{border-color:var(--cyan);color:var(--cyan);background:#00f3ff12}.scan{position:absolute;top:50%;left:50%;width:min(54vw,230px);aspect-ratio:1;transform:translate(-50%,-50%);border:1px solid #00f3ff65;border-radius:50%;box-shadow:0 0 28px #00f3ff10,inset 0 0 28px #00f3ff0c;pointer-events:none}.scan:before,.scan:after{content:"";position:absolute;background:#00f3ff3d}.scan:before{left:50%;top:-12%;height:124%;width:1px}.scan:after{top:50%;left:-12%;width:124%;height:1px}.scan-ring{position:absolute;inset:12%;border:1px dashed #00f3ff50;border-radius:50%;animation:spin 18s linear infinite}.scan-label{position:absolute;left:50%;top:calc(50% + min(29vw,125px));transform:translateX(-50%);white-space:nowrap;font-size:10px;letter-spacing:.15em;color:var(--cyan)}@keyframes spin{to{transform:rotate(360deg)}}.bottom{position:absolute;left:14px;right:14px;bottom:calc(12px + env(safe-area-inset-bottom));display:grid;gap:10px}.radar-card{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px}.metric{font-size:22px;font-weight:800;letter-spacing:-.04em}.metric small{font-size:11px;color:var(--muted);font-weight:500;letter-spacing:0}.actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}.actions button{font-size:11px;letter-spacing:.08em;text-transform:uppercase}.drawer{position:absolute;left:14px;right:14px;top:calc(env(safe-area-inset-top) + 164px);bottom:calc(178px + env(safe-area-inset-bottom));min-height:0;overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding:16px;display:none;pointer-events:auto}.drawer.open{display:block}.drawer>*{min-width:0}.drawer .actions{padding-bottom:4px}.drawer h2{margin:5px 0 14px;font-size:20px}.field{display:grid;gap:6px;margin:12px 0}.field label{font-size:11px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase}.field input,.field select,.field textarea{width:100%;min-width:0;border:1px solid #20434c;border-radius:7px;background:#02080c;color:#e9fcff;padding:11px}.field textarea{min-height:82px;resize:vertical}.row{display:flex;gap:8px}.row>*{flex:1;min-width:0}.layer-list{display:grid;gap:8px}.layer-item{padding:12px;border:1px solid #17333b;border-radius:8px;background:#061015}.layer-item strong{display:block;font-size:13px}.layer-item p{font-size:11px;color:var(--muted);margin:6px 0}.layer-item button{min-height:34px;padding:6px 9px;font-size:10px}.notice{font-size:11px;line-height:1.5;color:var(--muted);padding:10px;border-left:2px solid var(--cyan);background:#00f3ff08}.toast{position:absolute;left:50%;top:calc(env(safe-area-inset-top) + 148px);transform:translate(-50%,-8px);max-width:calc(100vw - 28px);padding:10px 14px;opacity:0;transition:.2s;background:#06151b;border:1px solid var(--line);border-radius:8px;font-size:12px;text-align:center}.toast.show{opacity:1;transform:translate(-50%,0)}.hidden{display:none!important}.footerline{display:flex;justify-content:space-between;gap:8px;color:#67818a;font-size:9px;letter-spacing:.1em}.premium{color:#ffc36b}.opened-card{position:absolute;left:14px;right:14px;top:50%;transform:translateY(-50%);max-height:52vh;overflow:auto;padding:16px;display:none;pointer-events:auto}.opened-card.open{display:block}.opened-card img{max-width:100%;max-height:24vh;object-fit:contain}.opened-card audio{width:100%}.file-label{display:block;text-align:center;border:1px dashed var(--line);padding:12px;border-radius:8px;font-size:12px}.file-label input{width:100%;margin-top:8px;font-size:11px}@media(max-height:760px){.modebar{top:calc(env(safe-area-inset-top) + 92px)}.drawer{top:calc(env(safe-area-inset-top) + 145px);bottom:calc(160px + env(safe-area-inset-bottom));padding:12px}.bottom{gap:6px}.radar-card{padding:9px 12px}.actions button{min-height:40px}}@media(min-width:760px){.bottom{max-width:440px;left:auto}.drawer{left:auto;width:390px;bottom:20px}.modebar{top:calc(env(safe-area-inset-top) + 104px);right:auto;width:460px}.scan{width:230px}.opened-card{left:50%;right:auto;width:420px;transform:translate(-50%,-50%)}}@media(prefers-reduced-motion:reduce){.scan-ring{animation:none}}
+  </style>
+</head>
+<body>
+  <main id="scene" aria-label="Spatial rendering view">
+    <video id="camera-feed" autoplay muted playsinline></video>
+  </main>
+  <div id="hud">
+    <header class="topbar">
+      <div class="brand-block">
+        <div class="brand">GHOST <span>LAYERS</span></div>
+        <div class="eyebrow">Spatial layer system / 0.1</div>
+        <div class="status"><i class="dot"></i><span id="status-text">LOCAL MODE</span></div>
+      </div>
+      <button id="menu-btn" class="interactive" aria-label="Open layer library">☰</button>
+    </header>
+    <nav class="modebar interactive" aria-label="Operating mode">
+      <button data-mode="search" aria-pressed="true">Search</button>
+      <button data-mode="create" aria-pressed="false">Create</button>
+      <button data-mode="library" aria-pressed="false">Layers <span id="layer-count">0</span></button>
+    </nav>
+    <div class="scan" aria-hidden="true"><div class="scan-ring"></div></div>
+    <div class="scan-label" id="scan-label">SCANNING FIELD // WAITING FOR SENSOR</div>
+    <section id="create-drawer" class="drawer panel" aria-label="Create spatial layer">
+      <div class="eyebrow">New marker / local-first</div><h2>Place a ghost layer</h2>
+      <div class="field"><label for="content-type">Content type</label><select id="content-type"><option value="TEXT">Text / message</option><option value="IMAGE">Image</option><option value="IMAGE_AUDIO">Image + audio</option><option value="AUDIO">Audio</option></select></div>
+      <div class="field"><label for="layer-title">Title</label><input id="layer-title" maxlength="100" value="Без названия" placeholder="Layer title"></div>
+      <div class="field"><label for="layer-caption">Caption / text (max 1000 chars)</label><textarea id="layer-caption" maxlength="1000" placeholder="Leave a message in physical space..."></textarea></div>
+      <div class="field"><label for="image-file">Image (optional)</label><input id="image-file" type="file" accept="image/png,image/jpeg,image/webp"></div>
+      <div class="field"><label for="audio-file">Audio (max 30 seconds)</label><input id="audio-file" type="file" accept="audio/mpeg,audio/mp4,audio/ogg,audio/wav,audio/webm"></div>
+      <div class="row"><div class="field"><label for="scale">Scale</label><input id="scale" type="range" min=".25" max="2.5" step=".05" value="1"></div><div class="field"><label for="yaw">Angle</label><input id="yaw" type="range" min="-180" max="180" step="1" value="0"></div></div>
+      <div class="notice">In WebXR, aim at a detected surface and tap <b>Scan / place</b>. Mobile fallback uses GPS + compass proximity; it cannot detect walls or create true spatial anchors.</div>
+      <div class="actions"><button id="place-btn" class="primary">Scan / place</button><button id="cancel-create">Cancel</button></div>
+    </section>
+    <section id="library-drawer" class="drawer panel" aria-label="Layer library">
+      <div class="eyebrow">Marker database</div><h2>Nearby layers</h2>
+      <div class="row"><button id="export-btn">Export JSON</button><button id="import-btn">Import JSON</button><input id="import-file" class="hidden" type="file" accept="application/json,.json"></div>
+      <p class="small">Saved on this device. Imported marker metadata may reference media files that are not embedded in JSON.</p>
+      <div id="layer-list" class="layer-list"></div>
+    </section>
+    <section id="opened-card" class="opened-card panel" aria-label="Opened layer"></section>
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+    <section class="bottom">
+      <div class="radar-card panel">
+        <div><div class="eyebrow">Proximity radar</div><div class="metric"><span id="nearby-count">0</span> <small>objects nearby</small></div></div>
+        <div style="text-align:right"><div class="eyebrow">Nearest</div><div class="metric" id="nearest-distance">— <small>m</small></div></div>
+      </div>
+      <div class="actions interactive">
+        <button id="xr-btn" class="primary">Enter AR</button>
+        <button id="camera-btn">Mobile camera</button>
+      </div>
+      <div class="footerline"><span id="location-state">LOCATION: NOT SHARED</span><span id="fps">FPS --</span><span>LOCAL STORAGE</span></div>
+    </section>
+  </div>
+  <script type="module" src="./app.js"></script>
+</body>
+</html>

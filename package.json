@@ -1,0 +1,22 @@
+{
+  "name": "ghost-layers",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 0.0.0.0",
+    "build": "vite build",
+    "preview": "vite preview --host 0.0.0.0",
+    "android:sync": "npm run build && cap sync android",
+    "android:apk": "npm run build && cap sync android"
+  },
+  "dependencies": {
+    "three": "^0.180.0",
+    "@capacitor/core": "^7.4.3",
+    "@capacitor/android": "^7.4.3"
+  },
+  "devDependencies": {
+    "vite": "^7.1.7",
+    "@capacitor/cli": "^7.4.3"
+  }
+}

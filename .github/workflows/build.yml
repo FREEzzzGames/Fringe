@@ -1,0 +1,89 @@
+name: Build Ghost Layer Android APK
+
+on:
+  push:
+    branches: [ghost-layers-mvp]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ghost-layer-android-${{ github.event_name }}
+  cancel-in-progress: true
+
+jobs:
+  android-apk:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Install Android SDK packages
+        shell: bash
+        run: |
+          SDK_ROOT="${ANDROID_HOME:-/usr/local/lib/android/sdk}"
+          SDKMANAGER="$SDK_ROOT/cmdline-tools/latest/bin/sdkmanager"
+          test -x "$SDKMANAGER"
+          yes | "$SDKMANAGER" --licenses >/dev/null || true
+          "$SDKMANAGER" "platform-tools" "platforms;android-35" "build-tools;35.0.0"
+          echo "$SDK_ROOT/platform-tools" >> "$GITHUB_PATH"
+          echo "$SDK_ROOT/build-tools/35.0.0" >> "$GITHUB_PATH"
+          echo "ANDROID_HOME=$SDK_ROOT" >> "$GITHUB_ENV"
+          echo "ANDROID_SDK_ROOT=$SDK_ROOT" >> "$GITHUB_ENV"
+      - name: Install web dependencies
+        run: npm install
+      - name: Build web app
+        run: npm run build
+      - name: Generate Android project
+        run: npx cap add android
+      - name: Add Android runtime permission declarations
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path("android/app/src/main/AndroidManifest.xml")
+          s = p.read_text()
+          marker = '<manifest xmlns:android="http://schemas.android.com/apk/res/android">'
+          if marker not in s:
+              raise SystemExit("AndroidManifest.xml root marker not found")
+          permissions = [
+              '    <uses-permission android:name="android.permission.INTERNET" />',
+              '    <uses-permission android:name="android.permission.CAMERA" />',
+              '    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />',
+              '    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />',
+              '    <uses-feature android:name="android.hardware.camera" android:required="false" />',
+              '    <uses-feature android:name="android.hardware.location.gps" android:required="false" />'
+          ]
+          insert = marker + '\\n' + '\\n'.join(x for x in permissions if x.split('name="')[1].split('"')[0] not in s)
+          p.write_text(s.replace(marker, insert, 1))
+          print("Declared camera, location and internet permissions/features.")
+          PY
+      - name: Sync app assets
+        run: npx cap sync android
+      - name: Build debug APK
+        run: |
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleDebug
+      - name: Verify APK
+        run: |
+          test -s android/app/build/outputs/apk/debug/app-debug.apk
+          ls -lh android/app/build/outputs/apk/debug/app-debug.apk
+      - name: Upload test APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: ghost-layer-debug-apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          retention-days: 14

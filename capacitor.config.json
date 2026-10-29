@@ -1,0 +1,17 @@
+{
+  "appId": "com.freezzzgames.ghostlayers",
+  "appName": "Ghost Layer",
+  "webDir": "dist",
+  "bundledWebRuntime": false,
+  "server": {
+    "url": "https://ghost-layer-ota.onrender.com",
+    "cleartext": false,
+    "allowNavigation": [
+      "ghost-layer-ota.onrender.com"
+    ]
+  },
+  "android": {
+    "allowMixedContent": false,
+    "backgroundColor": "#05090d"
+  }
+}

@@ -1,0 +1,26 @@
+[
+  {
+    "layer_id": "gl_anchor_88204",
+    "layer_type": "PREMIUM",
+    "location": {
+      "latitude": 52.520008,
+      "longitude": 13.404954,
+      "altitude": 1.5,
+      "orientation_vector": { "pitch": 0.05, "roll": -0.01, "azimuth_yaw": 182.4 }
+    },
+    "content": {
+      "type": "IMAGE_AUDIO",
+      "media_url": "./assets/graffiti_01.png",
+      "audio_url": "./assets/ambient_track.mp3",
+      "title": "Без названия",
+      "author": "D3tr01t",
+      "caption": "Оставаться живыми.",
+      "timestamp": "2026-04-12T18:27:00Z"
+    },
+    "monetization": {
+      "is_for_rent": true,
+      "weekly_rate_usd": 50,
+      "owner_address": "0xGhost...Landlord"
+    }
+  }
+]
