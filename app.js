@@ -28,6 +28,7 @@ const MAX_AUDIO_BYTES = 12 * 1024 * 1024;
 
 let layers = loadLayers();
 let mode = "search";
+let xrSupported = false;
 let xrSession = null;
 let viewerSpace = null;
 let hitTestSource = null;
