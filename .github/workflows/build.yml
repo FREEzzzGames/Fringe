@@ -47,6 +47,28 @@ jobs:
         run: npm run build
       - name: Generate Android project
         run: npx cap add android
+      - name: Add Android runtime permission declarations
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path("android/app/src/main/AndroidManifest.xml")
+          s = p.read_text()
+          marker = '<manifest xmlns:android="http://schemas.android.com/apk/res/android">'
+          if marker not in s:
+              raise SystemExit("AndroidManifest.xml root marker not found")
+          permissions = [
+              '    <uses-permission android:name="android.permission.INTERNET" />',
+              '    <uses-permission android:name="android.permission.CAMERA" />',
+              '    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />',
+              '    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />',
+              '    <uses-feature android:name="android.hardware.camera" android:required="false" />',
+              '    <uses-feature android:name="android.hardware.location.gps" android:required="false" />'
+          ]
+          insert = marker + '\\n' + '\\n'.join(x for x in permissions if x.split('name="')[1].split('"')[0] not in s)
+          p.write_text(s.replace(marker, insert, 1))
+          print("Declared camera, location and internet permissions/features.")
+          PY
       - name: Sync app assets
         run: npx cap sync android
       - name: Build debug APK
@@ -54,6 +76,10 @@ jobs:
           cd android
           chmod +x gradlew
           ./gradlew assembleDebug
+      - name: Verify APK
+        run: |
+          test -s android/app/build/outputs/apk/debug/app-debug.apk
+          ls -lh android/app/build/outputs/apk/debug/app-debug.apk
       - name: Upload test APK
         uses: actions/upload-artifact@v4
         with:
