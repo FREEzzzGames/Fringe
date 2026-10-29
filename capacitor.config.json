@@ -3,6 +3,13 @@
   "appName": "Ghost Layer",
   "webDir": "dist",
   "bundledWebRuntime": false,
+  "server": {
+    "url": "https://freezzzgames.github.io/Fringe/",
+    "cleartext": false,
+    "allowNavigation": [
+      "freezzzgames.github.io"
+    ]
+  },
   "android": {
     "allowMixedContent": false,
     "backgroundColor": "#05090d"
