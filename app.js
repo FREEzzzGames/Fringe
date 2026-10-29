@@ -202,7 +202,8 @@ function renderFrame(time, frame) {
 
 async function enterAR() {
   if (!navigator.xr) {
-    showToast("WebXR is not available here. Use Mobile camera for the sensor fallback.");
+    statusText.textContent = "SENSOR FALLBACK";
+    showToast("AR is not supported by this Android WebView. Use Mobile camera for GPS/compass mode.");
     return;
   }
   try {
@@ -272,7 +273,8 @@ async function toggleCamera() {
     cameraFeed.srcObject = null;
     cameraFeed.style.display = "none";
     cameraButton.textContent = "Mobile camera";
-    showToast("Camera overlay stopped.");
+    statusText.textContent = "SENSOR FALLBACK";
+    showToast("Camera stopped. GPS proximity can continue if location is allowed.");
     return;
   }
   if (!navigator.mediaDevices?.getUserMedia) {
@@ -638,6 +640,11 @@ async function boot() {
       xrButton.title = "This browser may not support immersive-ar.";
     }
   } catch { /* WebXR not exposed in this browser. */ }
+  if (!xrSupported) {
+    xrButton.textContent = "AR unavailable";
+    xrButton.title = "This Android WebView does not expose WebXR immersive-ar. Use Mobile camera.";
+    xrButton.setAttribute("aria-label", "AR unavailable; use Mobile camera");
+  }
   if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
     try {
       const registration = await navigator.serviceWorker.register("./sw.js", { updateViaCache: "none" });
