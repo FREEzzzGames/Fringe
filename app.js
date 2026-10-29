@@ -638,7 +638,24 @@ async function boot() {
     }
   } catch { /* WebXR not exposed in this browser. */ }
   if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
-    navigator.serviceWorker.register("./sw.js").catch((error) => console.debug("Service worker unavailable:", error));
+    try {
+      const registration = await navigator.serviceWorker.register("./sw.js", { updateViaCache: "none" });
+      // Check for a freshly deployed commit on every app re-entry and when returning to the foreground.
+      const checkForPatch = () => registration.update().catch((error) => console.debug("Update check deferred:", error));
+      checkForPatch();
+      window.addEventListener("focus", checkForPatch);
+      document.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === "visible") checkForPatch();
+      });
+      let reloadingForPatch = false;
+      navigator.serviceWorker.addEventListener("controllerchange", () => {
+        if (reloadingForPatch) return;
+        reloadingForPatch = true;
+        location.reload();
+      });
+    } catch (error) {
+      console.debug("Service worker unavailable:", error);
+    }
   }
   // The example schema is bundled separately; no remote APIs or remote assets are fetched.
 }
