@@ -644,6 +644,7 @@ async function boot() {
     xrButton.textContent = "AR unavailable";
     xrButton.title = "This Android WebView does not expose WebXR immersive-ar. Use Mobile camera.";
     xrButton.setAttribute("aria-label", "AR unavailable; use Mobile camera");
+    xrButton.disabled = true;
   }
   if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
     try {
